@@ -1,0 +1,2 @@
+GET https://api.predic8.de/shop/v2/products HTTP/2
+accept: application/json

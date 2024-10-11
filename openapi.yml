@@ -1,0 +1,204 @@
+openapi: '3.0.3'
+info:
+  title: Katalog API
+  version: '1.0'
+  description: Diese API dient dem Artikelmanagement
+  contact:
+    email: test@test.com
+servers:
+  - url: https://api.server.test/v1
+tags:
+  - name: Shop
+paths:
+  /artikel:
+    get:
+      summary: Gebe alle Artikel
+      description: Liefert alle Artikel zurück
+      operationId: getAllArtikel
+      tags:
+        - Shop
+      security:
+      - roles: [user, admin, guest]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResponseArtikel'
+    post:
+      summary: Lege einen neuen Artikel an
+      description: | 
+        # Der Artikel
+        
+        ## Hier ist die Dokumentation des _Artikels_. Dieser besteht aus:
+
+        - name 
+        - preis
+
+        Wenn es sich um einen Response handelt, dann gibt es noch die UUID.
+
+          - uuid
+
+        Mit diesem Endpunkt wird ein neuer Artikel angelegt.
+
+        Inline-style: 
+        ![alt text](https://miro.medium.com/v2/resize:fit:1400/0*Gt-TWOvzwFZNF6ut.png "Unsere API Security")
+
+        | Tables        | Are           | Cool  |
+        | ------------- |:-------------:| -----:|
+        | col 3 is      | right-aligned | $1600 |
+        | col 2 is      | centered      |   $12 |
+        | zebra stripes | are neat      |    $1 |
+
+      operationId: createArtikel
+      tags:
+        - Shop
+      security:
+        - roles: [user, admin]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestArtikel'            
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              description: Das ist der neue Link zum Artikel
+              schema:
+                type: string
+                format: uri
+                example: <host>/articles/73f226fe-018f-4410-92a5-c31961f5b6e1
+                description: Dies ist der Location Header für das neue Objekt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseArtikel'
+        '4XX':
+          description: Clientdaten nicht ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '5XX':
+          description: Clientdaten nicht ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /artikel/{aid}:
+    parameters:
+      - in: path
+        name: aid
+        schema:
+          type: string
+          format: uuid
+        required: true
+    get:
+      summary: Gebe den Artikel
+      description: Liefert den Artikel zurück
+      operationId: getArtikel
+      tags:
+        - Shop
+      security:
+      - roles: [user, admin, guest]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:                
+                $ref: '#/components/schemas/ResponseArtikel'
+    put:
+      summary: Ändere einen Artikel
+      description: Ein Artikel wird geändert
+      operationId: updateArtikel
+      tags:
+        - Shop
+      security:
+        - roles: [user, admin]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestArtikel'            
+      responses:
+        '200':
+          description: Changed          
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseArtikel'       
+    delete:
+      summary: Lösche einen Artikel
+      description: Ein Artikel wird gelöscht
+      operationId: deleteArtikel
+      tags:
+        - Shop
+      security:
+        - roles: [user, admin]      
+      responses:
+        '200':
+          description: deleted                    
+components:
+  securitySchemes:
+    roles:
+      type: apiKey
+      in: header
+      name: X-Role
+      x-roles:
+        - admin
+        - user
+        - guest
+  schemas:
+    ErrorResponse:
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 73f226fe-018f-4410-92a5-c31961f5b6e1
+          description: Das ist die UUID/TracingID des Fehlers!
+        errorCode:
+          type: string
+          maxLength: 10
+          description: ErrorCode meines Systems
+        errorDescription:
+          type: string
+          maxLength: 4096
+          description: Fehlerbeschreibung
+    ResponseArtikel:
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 73f226fe-018f-4410-92a5-c31961f5b6e1
+          description: Das ist die UUID des Artikels die vom System vergeben wird.
+        name:
+          type: string
+          maxLength: 40
+          example: Grapefruit
+          description: Ein toller Artikel
+        preis:
+          type: number
+          minimum: 0
+          example: 1.99
+          description: Preis darf nicht negativ sein!
+      required:
+        - id
+        - name
+        - preis
+    RequestArtikel:
+      properties:
+        name:
+            type: string
+            maxLength: 40
+        preis:
+          type: number
+          minimum: 0
+      required:        
+        - name
+        - preis
